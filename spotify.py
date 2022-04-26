@@ -15,16 +15,14 @@ import os
 import sqlite3
 
 # remember to close conn?
-def spotify_topSongsByGenre(genres, playlists, cur, conn):
+def spotify_topSongsByGenre(category, playlists):
     results = []
     sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(client_id="8aabcaafe3a64000bd21b6936a2f7a9b",
                                                                             client_secret="144250a9c95d481ab07c2d293a54f64c"))
-    for iter in range(len(genres)):
-        # pl_id = 'spotify:playlist:37i9dQZF1DWUa8ZRTfalHk'
+    for iter in range(len(category)):
         pl_id = 'spotify:playlist:' + playlists[iter]
         offset = 0
-        genre = genres[iter]
-
+        cat = category[iter]
 
         while True:
             response = sp.playlist_items(pl_id,
@@ -35,20 +33,19 @@ def spotify_topSongsByGenre(genres, playlists, cur, conn):
             if len(response['items']) == 0:
                 break
             for i in range(len(response['items'])):
-                # get the first artist
+                # make a tuple and insert into list
                 artist_uri = response['items'][i]['track']['artists'][0]['id']
                 artist_name = response['items'][i]['track']['artists'][0]['name']
                 song_uri = response['items'][i]['track']['id']
                 song_name = response['items'][i]['track']['name']
-                results.append((song_uri, song_name, genre, artist_name, artist_uri))
+                results.append((song_uri, song_name, cat, artist_name, artist_uri))
             offset = offset + len(response['items'])
-    # print(results)
-    conn.commit()
     return results
 
 
 
-def insert_into_database(cur, conn, song_data):
+def insert_into_database_genre(cur, conn, song_data):
+    # print(len(song_data))
     count = 0
     while True:
         cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
@@ -80,6 +77,10 @@ def insert_into_database(cur, conn, song_data):
         count += 1
         if count % 25 == 0:
             break
+    # stop inserting if song_data is inserting for 
+    # if len(song_data) >= count:
+    #     conn.commit()
+    #     return
     while True:
         cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
         count += 1
@@ -120,6 +121,40 @@ def insert_into_database(cur, conn, song_data):
         count += 1
     conn.commit()
     
+def insert_into_database_region(cur, conn, song_data):
+    # print(len(song_data))
+    count = 0
+    while True:
+        cur.execute("INSERT OR IGNORE INTO TopSongsByRegion (Song_URI,Song_title,Region,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
+        count += 1
+        if count % 25 == 0:
+            break
+    while True:
+        cur.execute("INSERT OR IGNORE INTO TopSongsByRegion (Song_URI,Song_title,Region,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
+        count += 1
+        if count % 25 == 0:
+            break
+    while True:
+        cur.execute("INSERT OR IGNORE INTO TopSongsByRegion (Song_URI,Song_title,Region,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
+        count += 1
+        if count % 25 == 0:
+            break
+    while True:
+        cur.execute("INSERT OR IGNORE INTO TopSongsByRegion (Song_URI,Song_title,Region,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
+        count += 1
+        if count % 25 == 0:
+            break
+    while True:
+        cur.execute("INSERT OR IGNORE INTO TopSongsByRegion (Song_URI,Song_title,Region,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
+        count += 1
+        if count % 25 == 0:
+            break
+    while True:
+        cur.execute("INSERT OR IGNORE INTO TopSongsByRegion (Song_URI,Song_title,Region,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
+        count += 1
+        if count % 25 == 0:
+            break
+    conn.commit()
 
 def setUpDatabase(db_name):
     path = os.path.dirname(os.path.abspath(__file__))
@@ -133,17 +168,6 @@ def setUpDatabase(db_name):
     cur.execute("CREATE TABLE TopSongsByRegion (Song_URI TEXT PRIMARY KEY, Song_title TEXT UNIQUE, Region TEXT, Artist TEXT, Artist_URI TEXT)")
     return cur, conn
 
-# def setUpTypesTable(data, cur, conn):
-#     type_list = []
-#     for pokemon in data:
-#         pokemon_type = pokemon['type'][0]
-#         if pokemon_type not in type_list:
-#             type_list.append(pokemon_type)
-#     cur.execute("CREATE TABLE IF NOT EXISTS Types (id INTEGER PRIMARY KEY, type TEXT UNIQUE)")
-#     for i in range(len(type_list)):
-#         cur.execute("INSERT OR IGNORE INTO Types (id,type) VALUES (?,?)",(i,type_list[i]))
-#     conn.commit()
-
 
 # Pop rising: https://open.spotify.com/playlist/37i9dQZF1DWUa8ZRTfalHk?si=2a443aa7a8fc49a9
 # Rap caviar: https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd?si=f539f715e8814d46
@@ -154,12 +178,22 @@ def setUpDatabase(db_name):
 
 
 def main():
+    # set up tables in the database
+    cur, conn = setUpDatabase('spotify.db') # REDO THIS
+
+    # insert top songs in each genre into the TopSongsByGenre table
     genres = ['Pop', 'Rap', 'R&B', 'Country', 'Latino'] # latin or latino???
     playlists = ['37i9dQZF1DWUa8ZRTfalHk', '37i9dQZF1DX0XUsuxWHRQd', 
                  '37i9dQZF1DX7FY5ma9162x', '37i9dQZF1DX1lVhptIYRda', '37i9dQZF1DX10zKzsJ2jva']
-    cur, conn = setUpDatabase('spotify.db')
-    song_data = spotify_topSongsByGenre(genres, playlists, cur, conn)
-    insert_into_database(cur, conn, song_data)
+    song_data = spotify_topSongsByGenre(genres, playlists)
+    insert_into_database_genre(cur, conn, song_data)
+
+    # insert top songs in each country in North America into the TopSongsByRegion table
+    regions = ['USA', 'Canada', 'Mexico']
+    playlists = ['37i9dQZEVXbLRQDuF5jeBp', '37i9dQZEVXbKj23U1GF4IR', '37i9dQZEVXbO3qyFxbkOE1']
+    song_data = spotify_topSongsByGenre(regions, playlists)
+    insert_into_database_region(cur, conn, song_data)
+
 
 if __name__ == "__main__":
     main()
