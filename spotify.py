@@ -143,17 +143,21 @@ def billboard_info(url):
         song_info.append((title, name, weeks))
     return song_info        
     
+def add_billboard_songs(cur, conn, song_data):
+    start = 0
+    end = 25
+    while (end <= len(song_data)):
+        insert_into_database_billboard(cur, conn, song_data, start, end)
+        start += 25
+        end += 25
+    insert_into_database_billboard(cur, conn, song_data, end, len(song_data))
 
-def add_songs(song_info, cur, conn):
-    ranking = 1
-    for song in song_info:
-        title = song[0]
-        name = song[1]
-        weeks = song[2]
-        cur.execute("INSERT INTO billboard (ranking, title, artist, weeks_on_chart) VALUES(?, ?, ?, ?)", (ranking, title, name, weeks))
+def insert_into_database_billboard(cur, conn, song_data, start, end):
+    ranking = start + 1
+    for i in song_data[start:end]:
+        cur.execute("INSERT INTO billboard (ranking, title, artist, weeks_on_chart) VALUES(?, ?, ?, ?)", (ranking, i[0], i[1], i[2]))
         ranking += 1
     conn.commit()
-
 
 def find_similar_songs_region(cur):
     lst = []
@@ -223,8 +227,8 @@ def make_bar_chart_genre(totals, labels):
     y_pos = np.arange(len(labels))
     plt.barh(y_pos, totals, align='center', alpha=0.5)
     plt.yticks(y_pos, labels)
-    plt.xlabel('Songs')
-    plt.title('Number of Overlapping Songs per Genre on Billboard Hot 100')
+    plt.xlabel("Number of Overlapping Songs")
+    plt.title('Number of Overlapping Songs per Genre\n between Billboard Hot 100 and Spotify')
     plt.show()
 
 
@@ -232,8 +236,8 @@ def make_bar_chart_region(totals, labels):
     y_pos = np.arange(len(labels))
     plt.barh(y_pos, totals, align='center', alpha=0.5)
     plt.yticks(y_pos, labels)
-    plt.xlabel('Songs')
-    plt.title('Number of Overlapping Songs per Country on Billboard Hot 100')
+    plt.xlabel('Number of Songs')
+    plt.title('Number of Overlapping Songs per Country\n between Billboard Hot 100 and Spotify')
     plt.show()
 
 
@@ -256,7 +260,7 @@ def main():
 
     # insert songs from billboard 100 into billboard table
     song_info = billboard_info("https://www.billboard.com/charts/hot-100/")
-    add_songs(song_info, cur, conn)
+    add_billboard_songs(cur, conn, song_info)
 
     # find overlapping songs from top songs in region and billboard 100
     region_totals, region_labels = find_similar_songs_region(cur)
