@@ -1,13 +1,3 @@
-# import spotipy
-# from spotipy.oauth2 import SpotifyClientCredentials
-
-# sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id="8aabcaafe3a64000bd21b6936a2f7a9b",
-#                                                            client_secret="144250a9c95d481ab07c2d293a54f64c"))
-
-# results = sp.search(q='weezer', limit=20)
-# for idx, track in enumerate(results['tracks']['items']):
-#     print(idx, track['name'])
-
 from spotipy.oauth2 import SpotifyClientCredentials
 import spotipy
 import sqlite3
@@ -19,11 +9,10 @@ import csv
 import matplotlib.pyplot as plt
 import numpy as np
 
-# remember to close conn?
 def spotify_top_songs(category, playlists):
     results = []
-    sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(client_id="8aabcaafe3a64000bd21b6936a2f7a9b",
-                                                                            client_secret="144250a9c95d481ab07c2d293a54f64c"))
+    sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(client_id=CLIENT_ID,
+                                                                            client_secret=CLIENT_SECRET))
     for iter in range(len(category)):
         pl_id = 'spotify:playlist:' + playlists[iter]
         offset = 0
@@ -95,12 +84,6 @@ def setUpDatabase(db_name):
     conn.commit()
     return cur, conn
 
-
-# Pop rising: https://open.spotify.com/playlist/37i9dQZF1DWUa8ZRTfalHk?si=2a443aa7a8fc49a9
-# Rap caviar: https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd?si=f539f715e8814d46
-# r&b favourites: https://open.spotify.com/playlist/37i9dQZF1DX7FY5ma9162x?si=826a2adc16ba47c2 
-# Hot country: https://open.spotify.com/playlist/37i9dQZF1DX1lVhptIYRda?si=619a851f09624040
-# Viva latino: https://open.spotify.com/playlist/37i9dQZF1DX10zKzsJ2jva?si=42ff4a262e3e4e52 
 
 def billboard_info(url): 
     ctx = ssl.create_default_context()
@@ -187,6 +170,7 @@ def find_similar_songs_region(cur):
         csvwriter.writerows(rows)
     return ([USA, Canada, Mexico], ["USA", "Canada", "Mexico"])
 
+
 def find_similar_songs_genre(cur):
     lst = []
     cur.execute(
@@ -243,10 +227,10 @@ def make_bar_chart_region(totals, labels):
 
 def main():
     # set up tables in the database
-    cur, conn = setUpDatabase('music.db') # REDO THIS
+    cur, conn = setUpDatabase('music.db')
 
     # insert top songs in each genre into the TopSongsByGenre table
-    genres = ['Pop', 'Rap', 'R&B', 'Country', 'Latino'] # latin or latino???
+    genres = ['Pop', 'Rap', 'R&B', 'Country', 'Latino'] 
     playlists = ['37i9dQZF1DWUa8ZRTfalHk', '37i9dQZF1DX0XUsuxWHRQd', 
                  '37i9dQZF1DX7FY5ma9162x', '37i9dQZF1DX1lVhptIYRda', '37i9dQZF1DX10zKzsJ2jva']
     song_data = spotify_top_songs(genres, playlists)
