@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # remember to close conn?
-def spotify_topSongsByGenre(category, playlists):
+def spotify_top_songs(category, playlists):
     results = []
     sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(client_id="8aabcaafe3a64000bd21b6936a2f7a9b",
                                                                             client_secret="144250a9c95d481ab07c2d293a54f64c"))
@@ -47,116 +47,35 @@ def spotify_topSongsByGenre(category, playlists):
     return results
 
 
-def insert_into_database_genre(cur, conn, song_data):
-    # print(len(song_data))
-    count = 0
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    # stop inserting if song_data is inserting for 
-    # if len(song_data) >= count:
-    #     conn.commit()
-    #     return
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True and count < len(song_data):
-        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
+def add_song_by_region(cur, conn, song_data):
+    start = 0
+    end = 25
+    while (end <= len(song_data)):
+        insert_into_database_region(cur, conn, song_data, start, end)
+        start += 25
+        end += 25
+    insert_into_database_region(cur, conn, song_data, end, len(song_data))
+
+
+def insert_into_database_region(cur, conn, song_data, start, end):
+    for i in song_data[start:end]:
+        cur.execute("INSERT OR IGNORE INTO TopSongsByRegion (Song_URI,Song_title,Region,Artist,Artist_URI) VALUES (?,?,?,?,?)",(i[0], i[1], i[2], i[3], i[4]))
     conn.commit()
-    
-    
-def insert_into_database_region(cur, conn, song_data):
-    count = 0
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByRegion (Song_URI,Song_title,Region,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByRegion (Song_URI,Song_title,Region,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByRegion (Song_URI,Song_title,Region,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByRegion (Song_URI,Song_title,Region,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByRegion (Song_URI,Song_title,Region,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
-    while True:
-        cur.execute("INSERT OR IGNORE INTO TopSongsByRegion (Song_URI,Song_title,Region,Artist,Artist_URI) VALUES (?,?,?,?,?)",(song_data[count][0],song_data[count][1],song_data[count][2],song_data[count][3],song_data[count][4]))
-        count += 1
-        if count % 25 == 0:
-            break
+  
+
+def add_song_by_genre(cur, conn, song_data):
+    start = 0
+    end = 25
+    while (end <= len(song_data)):
+        insert_into_database_genre(cur, conn, song_data, start, end)
+        start += 25
+        end += 25
+    insert_into_database_genre(cur, conn, song_data, end, len(song_data))
+
+
+def insert_into_database_genre(cur, conn, song_data, start, end):
+    for i in song_data[start:end]:
+        cur.execute("INSERT OR IGNORE INTO TopSongsByGenre (Song_URI,Song_title,Genre,Artist,Artist_URI) VALUES (?,?,?,?,?)",(i[0], i[1], i[2], i[3], i[4]))
     conn.commit()
 
 
@@ -247,7 +166,6 @@ def find_similar_songs_region(cur):
     )
     USA, Canada, Mexico, total = 0, 0, 0, 0
     for row in cur:
-        total += 1.0
         if row[0] == "USA":
             USA += 1.0
         elif row[0] == "Canada":
@@ -255,9 +173,9 @@ def find_similar_songs_region(cur):
         else:
             Mexico += 1.0
     # calculate percentage of countries to total and write to csv file
-    rows = [ ['USA', USA/total], 
-            ['Canada', Canada/total], 
-            ['Mexico', Mexico/total]] 
+    rows = [ ['USA', USA/100], 
+            ['Canada', Canada/100], 
+            ['Mexico', Mexico/100]] 
     # writing to csv file 
     with open("region_percentages.csv", 'w') as csvfile: 
         csvwriter = csv.writer(csvfile) 
@@ -288,11 +206,11 @@ def find_similar_songs_genre(cur):
         else:
             latino += 1.0
     # calculate percentage of genres to total and write to csv file
-    rows = [['Pop', pop/total], 
-            ['Rap', rap/total], 
-            ['R&B', rb/total],
-            ['Country', country/total],
-            ['Latino', latino/total]] 
+    rows = [['Pop', pop/100], 
+            ['Rap', rap/100], 
+            ['R&B', rb/100],
+            ['Country', country/100],
+            ['Latino', latino/100]] 
     # writing to csv file 
     with open("genre_percentages.csv", 'w') as csvfile: 
         csvwriter = csv.writer(csvfile) 
@@ -301,11 +219,23 @@ def find_similar_songs_genre(cur):
     return ([pop, rap, rb, country, latino], ["Pop", "Rap", "R&B", "Country", "Latino"])
 
 
-def make_pie_chart(totals, labels):
-    plt.pie(np.array(totals), labels = labels)
-    # plt.legend(title = "Four Fruits:")
-    # %matplotlib inline
-    plt.show() 
+def make_bar_chart_genre(totals, labels):
+    y_pos = np.arange(len(labels))
+    plt.barh(y_pos, totals, align='center', alpha=0.5)
+    plt.yticks(y_pos, labels)
+    plt.xlabel('Songs')
+    plt.title('Number of Overlapping Songs per Genre on Billboard Hot 100')
+    plt.show()
+
+
+def make_bar_chart_region(totals, labels):
+    y_pos = np.arange(len(labels))
+    plt.barh(y_pos, totals, align='center', alpha=0.5)
+    plt.yticks(y_pos, labels)
+    plt.xlabel('Songs')
+    plt.title('Number of Overlapping Songs per Country on Billboard Hot 100')
+    plt.show()
+
 
 def main():
     # set up tables in the database
@@ -315,14 +245,14 @@ def main():
     genres = ['Pop', 'Rap', 'R&B', 'Country', 'Latino'] # latin or latino???
     playlists = ['37i9dQZF1DWUa8ZRTfalHk', '37i9dQZF1DX0XUsuxWHRQd', 
                  '37i9dQZF1DX7FY5ma9162x', '37i9dQZF1DX1lVhptIYRda', '37i9dQZF1DX10zKzsJ2jva']
-    song_data = spotify_topSongsByGenre(genres, playlists)
-    insert_into_database_genre(cur, conn, song_data)
+    song_data = spotify_top_songs(genres, playlists)
+    add_song_by_genre(cur, conn, song_data)
 
     # insert top songs in each country in North America into the TopSongsByRegion table
     regions = ['USA', 'Canada', 'Mexico']
     playlists = ['37i9dQZEVXbLRQDuF5jeBp', '37i9dQZEVXbKj23U1GF4IR', '37i9dQZEVXbO3qyFxbkOE1']
-    song_data = spotify_topSongsByGenre(regions, playlists)
-    insert_into_database_region(cur, conn, song_data)
+    song_data = spotify_top_songs(regions, playlists)
+    add_song_by_region(cur, conn, song_data)
 
     # insert songs from billboard 100 into billboard table
     song_info = billboard_info("https://www.billboard.com/charts/hot-100/")
@@ -332,8 +262,9 @@ def main():
     region_totals, region_labels = find_similar_songs_region(cur)
     genre_totals, genre_labels = find_similar_songs_genre(cur)
 
-    make_pie_chart(region_totals, region_labels)
-    make_pie_chart(genre_totals, genre_labels)
+    # create visualizations
+    make_bar_chart_region(region_totals, region_labels)
+    make_bar_chart_genre(genre_totals, genre_labels)
 
 if __name__ == "__main__":
     main()
